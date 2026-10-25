@@ -107,6 +107,13 @@
         </div>
     @endif
 
+    @if($is_resubmission_mode)
+        <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-xs">
+            <i class="fa-solid fa-circle-check me-1"></i>
+            Pengajuan sebelumnya telah disetujui. Anda dapat mengunggah dokumen baru untuk pendaftaran ulang atau pembaruan; arsip pengajuan sebelumnya tetap tersimpan.
+        </div>
+    @endif
+
     <!-- Incomplete Warning -->
     @if(!$is_fully_complete)
         <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs">
@@ -154,7 +161,7 @@
                     Daftar 16 Persyaratan Pengajuan Berkas
                 </h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                    {{ $is_revision_mode ? 'Periksa status masing-masing dokumen. Unggah ulang hanya dokumen yang diminta revisi atau ditolak.' : 'Kelola dan unggah dokumen persyaratan pendaftaran Ormas Kesbangpol Kota Palembang.' }}
+                    {{ $is_revision_mode ? 'Periksa status masing-masing dokumen. Unggah ulang hanya dokumen yang diminta revisi atau ditolak.' : ($is_resubmission_mode ? 'Unggah dokumen untuk pengajuan baru. Dokumen dari pengajuan yang telah disetujui tetap tersimpan di riwayat.' : 'Kelola dan unggah dokumen persyaratan pendaftaran Ormas Kesbangpol Kota Palembang.') }}
                 </p>
             </div>
 
@@ -164,7 +171,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit" 
-                            @if(isset($active_submission) && $active_submission->is_locked) disabled title="Pengajuan sedang dikunci oleh Admin" @endif
+                            @if(isset($active_submission) && $active_submission->is_locked && !$is_resubmission_mode) disabled title="Pengajuan sedang dikunci oleh Admin" @endif
                             class="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-bold transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="fa-solid fa-trash-can text-rose-600 dark:text-rose-400"></i> Hapus Semua Berkas Terupload
                     </button>
@@ -412,12 +419,12 @@
     <div class="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="space-y-0.5 text-center sm:text-left">
             <h3 class="text-base font-bold text-slate-900 dark:text-white">
-                {{ $is_revision_mode ? 'Kirim Dokumen Revisi ke Admin' : 'Kirim Berkas Pendaftaran' }}
+                {{ $is_revision_mode ? 'Kirim Dokumen Revisi ke Admin' : ($is_resubmission_mode ? 'Kirim Pengajuan Baru atau Pembaruan' : 'Kirim Berkas Pendaftaran') }}
             </h3>
             <p class="text-xs text-slate-500 dark:text-slate-400">
                 {{ $is_revision_mode 
                     ? 'Pastikan seluruh berkas yang diminta revisi telah diperbaiki dan diunggah ulang sebelum mengirimkan kembali.' 
-                    : 'Pastikan seluruh 16 berkas telah terisi sebelum melakukan pengiriman.' }}
+                    : ($is_resubmission_mode ? 'Lengkapi dokumen yang diperlukan untuk membuat pengajuan baru atau memperbarui berkas Ormas.' : 'Pastikan seluruh 16 berkas telah terisi sebelum melakukan pengiriman.') }}
             </p>
         </div>
 
@@ -425,12 +432,12 @@
             @if($is_fully_complete)
                 <button type="button" @click="confirmModal = true" 
                         class="px-6 py-3 {{ $is_revision_mode ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gov-600 hover:bg-gov-700' }} text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> {{ $is_revision_mode ? 'Kirim Berkas Revisi' : 'Kirim Berkas' }}
+                    <i class="fa-solid fa-paper-plane"></i> {{ $is_revision_mode ? 'Kirim Berkas Revisi' : ($is_resubmission_mode ? 'Kirim Pengajuan Baru' : 'Kirim Berkas') }}
                 </button>
             @else
                 <button type="button" disabled 
                         class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed flex items-center gap-2">
-                    <i class="fa-solid fa-circle-exclamation"></i> {{ $is_revision_mode ? 'Kirim Berkas Revisi (Belum Lengkap)' : 'Kirim Berkas (Belum Lengkap)' }}
+                    <i class="fa-solid fa-circle-exclamation"></i> {{ $is_revision_mode ? 'Kirim Berkas Revisi (Belum Lengkap)' : ($is_resubmission_mode ? 'Kirim Pengajuan Baru (Belum Lengkap)' : 'Kirim Berkas (Belum Lengkap)') }}
                 </button>
             @endif
         </div>
@@ -499,7 +506,7 @@
 
             <div class="space-y-2">
                 <h3 class="text-base font-extrabold text-slate-900 dark:text-white">
-                    {{ $is_revision_mode ? 'Konfirmasi Pengiriman Berkas Revisi' : 'Konfirmasi Pengiriman Berkas' }}
+                    {{ $is_revision_mode ? 'Konfirmasi Pengiriman Berkas Revisi' : ($is_resubmission_mode ? 'Konfirmasi Pengajuan Baru atau Pembaruan' : 'Konfirmasi Pengiriman Berkas') }}
                 </h3>
                 
                 @if($is_revision_mode)
@@ -510,7 +517,7 @@
                     </p>
                 @else
                     <p class="p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                        "Apakah anda yakin bahwa semua data dan file sudah sepenuhnya lengkap? Jika belum tolong tekan tombol batal dan Jika sudah tolong tekan tombol Kirim"
+                        {{ $is_resubmission_mode ? 'Pengajuan sebelumnya akan tetap tersimpan di riwayat. Pengajuan baru atau pembaruan ini akan dikirim kepada Admin Kesbangpol untuk diperiksa.' : 'Apakah anda yakin bahwa semua data dan file sudah sepenuhnya lengkap? Jika belum tolong tekan tombol batal dan Jika sudah tolong tekan tombol Kirim' }}
                     </p>
                 @endif
             </div>

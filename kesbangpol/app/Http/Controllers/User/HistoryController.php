@@ -105,7 +105,7 @@ class HistoryController extends Controller
                 ->pluck('document_key')
                 ->toArray();
 
-            $userDocs = SubmissionDocument::where('user_id', $user->id)->get();
+            $userDocs = SubmissionDocument::where('submission_id', $submission->id)->get();
             foreach ($userDocs as $doc) {
                 if (!in_array($doc->document_key, $approvedKeys)) {
                     $problematicKeys[] = $doc->document_key;
@@ -116,7 +116,7 @@ class HistoryController extends Controller
         $problematicKeys = array_unique($problematicKeys);
 
         // 3. Archive problematic documents into document versions and delete active record so user can re-upload
-        $docsToRemove = SubmissionDocument::where('user_id', $user->id)
+        $docsToRemove = SubmissionDocument::where('submission_id', $submission->id)
             ->whereIn('document_key', $problematicKeys)
             ->get();
 

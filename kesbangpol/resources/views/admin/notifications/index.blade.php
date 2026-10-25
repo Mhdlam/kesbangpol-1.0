@@ -30,6 +30,11 @@
         <span><strong>Informasi Sistem:</strong> Semua history notifikasi akan terhapus otomatis dalam jangka waktu maksimal 30hari.</span>
     </div>
 
+    <!-- Web Push Desktop Notification Card -->
+    <div>
+        @include('partials.webpush_card')
+    </div>
+
     <!-- Notifications List -->
     <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
         @forelse($notifications as $n)

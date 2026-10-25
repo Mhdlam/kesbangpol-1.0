@@ -15,10 +15,9 @@ class RequirementChecker
     {
         $docQuery = SubmissionDocument::where('user_id', $user->id);
         if ($submission) {
-            $docQuery->where(function ($q) use ($submission) {
-                $q->where('submission_id', $submission->id)
-                  ->orWhereNull('submission_id');
-            });
+            $docQuery->where('submission_id', $submission->id);
+        } else {
+            $docQuery->whereNull('submission_id');
         }
         $docs = $docQuery->get()->keyBy('document_key');
 

@@ -24,9 +24,19 @@ class SubmissionController extends Controller
             ->latest()
             ->first();
 
-        $isRevision = $activeSubmission && $activeSubmission->status && $activeSubmission->status->code === Status::REVISION_NEEDED;
+        $statusCode = $activeSubmission?->status?->code;
+        $isRevision = $statusCode === Status::REVISION_NEEDED;
+        $isResubmission = $statusCode === Status::APPROVED;
 
-        $statusCheck = RequirementChecker::checkUserStatus($user, $isRevision ? $activeSubmission : null);
+        if ($activeSubmission && !$isRevision && !$isResubmission) {
+            return redirect()->route('user.dashboard')
+                ->with('error', 'Pengajuan terakhir masih terkunci atau belum selesai diproses. Tunggu hasil pemeriksaan Admin sebelum mengirim pengajuan baru.');
+        }
+
+        $statusCheck = RequirementChecker::checkUserStatus(
+            $user,
+            $isRevision ? $activeSubmission : ($isResubmission ? null : $activeSubmission)
+        );
 
         if (! $statusCheck['is_fully_complete']) {
             $msg = $isRevision

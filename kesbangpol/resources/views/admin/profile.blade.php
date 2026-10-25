@@ -131,5 +131,10 @@
             </div>
         </form>
     </div>
+
+    <!-- Web Push Desktop Notifications Setting -->
+    <div>
+        @include('partials.webpush_card')
+    </div>
 </div>
 @endsection

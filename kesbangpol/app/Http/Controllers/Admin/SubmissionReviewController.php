@@ -282,7 +282,7 @@ class SubmissionReviewController extends Controller
             $cleanOrgName = 'berkas_ormas_' . $submission->tracking_code;
         }
 
-        $documents = SubmissionDocument::where('user_id', $user->id)->get();
+        $documents = SubmissionDocument::where('submission_id', $submission->id)->get();
         $orgForm = OrganizationForm::where('user_id', $user->id)->first();
 
         if ($documents->isEmpty() && !$orgForm) {

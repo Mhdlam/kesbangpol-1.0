@@ -37,6 +37,11 @@ class DocumentController extends Controller
             ->latest()
             ->first();
 
+        // An approved submission is historical; new uploads belong to a fresh submission.
+        if ($submission && $submission->status && $submission->status->code === Status::APPROVED) {
+            $submission = null;
+        }
+
         if ($submission && $submission->is_locked) {
             // Check if this specific document is requested for revision
             $docReview = SubmissionDocumentReview::where('submission_id', $submission->id)
@@ -94,9 +99,16 @@ class DocumentController extends Controller
         }
 
         // Check existing document and store version history (Requirement H)
-        $existing = SubmissionDocument::where('user_id', $user->id)
-            ->where('document_key', $docKey)
-            ->first();
+        $existingQuery = SubmissionDocument::where('user_id', $user->id)
+            ->where('document_key', $docKey);
+
+        if ($submission) {
+            $existingQuery->where('submission_id', $submission->id);
+        } else {
+            $existingQuery->whereNull('submission_id');
+        }
+
+        $existing = $existingQuery->first();
 
         if ($existing) {
             $currentVersionCount = SubmissionDocumentVersion::where('user_id', $user->id)
@@ -178,7 +190,18 @@ class DocumentController extends Controller
             abort(403, 'Anda tidak memiliki akses untuk menghapus dokumen ini.');
         }
 
-        $submission = Submission::where('user_id', $user->id)->latest()->first();
+        $submission = $document->submission;
+
+        // Draft uploads have no submission yet. Keep them locked only while a newer
+        // submission is under review; an approved submission must not lock new drafts.
+        if ($user->role !== 'admin' && !$submission) {
+            $latestSubmission = Submission::where('user_id', $user->id)->latest()->first();
+            if ($latestSubmission && $latestSubmission->is_locked
+                && (!$latestSubmission->status || $latestSubmission->status->code !== Status::APPROVED)) {
+                $submission = $latestSubmission;
+            }
+        }
+
         if ($user->role !== 'admin' && $submission && $submission->is_locked) {
             $isRevision = ($submission->status && $submission->status->code === Status::REVISION_NEEDED);
             $docReview = SubmissionDocumentReview::where('submission_id', $submission->id)
@@ -211,11 +234,16 @@ class DocumentController extends Controller
         $user = Auth::user();
 
         $submission = Submission::where('user_id', $user->id)->latest()->first();
-        if ($user->role !== 'admin' && $submission && $submission->is_locked) {
+        if ($user->role !== 'admin' && $submission && $submission->is_locked
+            && (!$submission->status || $submission->status->code !== Status::APPROVED)) {
             return redirect()->back()->with('error', 'Pengajuan sedang dikunci atau dalam proses revisi. Berkas yang disetujui tidak dapat dihapus sekaligus.');
         }
 
-        $documents = SubmissionDocument::where('user_id', $user->id)->get();
+        $documentsQuery = SubmissionDocument::where('user_id', $user->id);
+        if ($user->role !== 'admin') {
+            $documentsQuery->whereNull('submission_id');
+        }
+        $documents = $documentsQuery->get();
 
         if ($documents->isEmpty()) {
             return redirect()->back()->with('error', 'Belum ada berkas terupload yang dapat dihapus.');

@@ -32,9 +32,14 @@
     </div>
 
     <!-- Info Auto Clean 30 Days -->
-    <div class="mb-6 bg-blue-50/80 dark:bg-slate-800/80 border border-blue-200 dark:border-slate-700 rounded-xl p-3.5 flex items-center gap-3 text-xs text-blue-900 dark:text-blue-200 shadow-sm">
+    <div class="mb-4 bg-blue-50/80 dark:bg-slate-800/80 border border-blue-200 dark:border-slate-700 rounded-xl p-3.5 flex items-center gap-3 text-xs text-blue-900 dark:text-blue-200 shadow-sm">
         <i class="fa-solid fa-circle-info text-blue-600 dark:text-blue-400 text-base flex-shrink-0"></i>
         <span><strong>Informasi Sistem:</strong> Semua history notifikasi akan terhapus otomatis dalam jangka waktu maksimal 30hari.</span>
+    </div>
+
+    <!-- Web Push Desktop Notification Card -->
+    <div class="mb-6">
+        @include('partials.webpush_card')
     </div>
 
     <!-- Notifications List Container -->

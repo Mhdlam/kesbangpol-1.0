@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\User\ChatController as UserChatController;
 use App\Http\Controllers\User\NotificationController as UserNotificationController;
 use App\Http\Controllers\Admin\ChatController as AdminChatController;
+use App\Http\Controllers\WebPushController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -40,10 +41,17 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-// Shared secure file & chat routes
+// Shared secure file, chat & Web Push routes
 Route::middleware('auth')->group(function () {
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('document.download');
     Route::get('/chat/attachment/{message}', [UserChatController::class, 'downloadAttachment'])->name('chat.download_attachment');
+
+    // Web Push Notification API
+    Route::get('/api/webpush/vapid-public-key', [WebPushController::class, 'vapidPublicKey'])->name('webpush.vapid_public_key');
+    Route::post('/api/webpush/subscribe', [WebPushController::class, 'subscribe'])->name('webpush.subscribe');
+    Route::post('/api/webpush/unsubscribe', [WebPushController::class, 'unsubscribe'])->name('webpush.unsubscribe');
+    Route::post('/api/webpush/test', [WebPushController::class, 'test'])->name('webpush.test');
+    Route::get('/api/webpush/status', [WebPushController::class, 'status'])->name('webpush.status');
 });
 
 // User routes

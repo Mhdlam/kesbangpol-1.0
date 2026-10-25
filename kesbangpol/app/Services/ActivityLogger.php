@@ -38,6 +38,9 @@ class ActivityLogger
                 'message' => $message,
                 'action_url' => $actionUrl,
             ]);
+
+            // Web Push notification to specific admin
+            WebPushService::sendToUser($targetAdminId, $title, $message, $actionUrl, $type);
         } else {
             // Notify all admins
             $adminIds = User::where('role', 'admin')->pluck('id');
@@ -50,6 +53,9 @@ class ActivityLogger
                     'action_url' => $actionUrl,
                 ]);
             }
+
+            // Web Push notification to all admins
+            WebPushService::sendToUsers($adminIds, $title, $message, $actionUrl, $type);
         }
     }
 
@@ -64,6 +70,9 @@ class ActivityLogger
             'message' => $message,
             'action_url' => $actionUrl,
         ]);
+
+        // Web Push notification to user
+        WebPushService::sendToUser($userId, $title, $message, $actionUrl, $type);
     }
 
     public static function notifyAllUsers(string $type, string $title, string $message, ?string $actionUrl = null): void
@@ -78,5 +87,8 @@ class ActivityLogger
                 'action_url' => $actionUrl,
             ]);
         }
+
+        // Web Push notification to all users
+        WebPushService::sendToUsers($userIds, $title, $message, $actionUrl, $type);
     }
 }

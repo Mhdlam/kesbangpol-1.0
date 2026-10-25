@@ -24,6 +24,21 @@ class AppServiceProvider extends ServiceProvider
         date_default_timezone_set('Asia/Jakarta');
         \Carbon\Carbon::setLocale('id');
 
+        // Ensure OpenSSL configuration is available on Windows environments for VAPID/EC key encryption
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && !getenv('OPENSSL_CONF')) {
+            $possiblePaths = [
+                'C:\xampp\php\extras\ssl\openssl.cnf',
+                'C:\xampp\apache\bin\openssl.cnf',
+                'C:\php\extras\ssl\openssl.cnf',
+            ];
+            foreach ($possiblePaths as $path) {
+                if (file_exists($path)) {
+                    putenv("OPENSSL_CONF={$path}");
+                    break;
+                }
+            }
+        }
+
         if (!app()->runningInConsole()) {
             view()->composer('*', function () {
                 if (Auth::check()) {

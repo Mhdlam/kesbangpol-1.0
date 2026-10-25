@@ -20,7 +20,14 @@ class DashboardController extends Controller
             ->latest()
             ->first();
 
-        $status = RequirementChecker::checkUserStatus($user, $activeSubmission);
+        $isResubmissionMode = $activeSubmission
+            && $activeSubmission->status
+            && $activeSubmission->status->code === \App\Models\Status::APPROVED;
+
+        $status = RequirementChecker::checkUserStatus(
+            $user,
+            $isResubmissionMode ? null : $activeSubmission
+        );
 
         $isRevisionMode = false;
         $latestRevisionHistory = null;
@@ -37,6 +44,7 @@ class DashboardController extends Controller
             'user' => $user,
             'active_submission' => $activeSubmission,
             'is_revision_mode' => $isRevisionMode,
+            'is_resubmission_mode' => (bool) $isResubmissionMode,
             'latest_revision_history' => $latestRevisionHistory,
         ]));
     }
